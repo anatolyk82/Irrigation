@@ -7,9 +7,10 @@
 
 #define CONTROLLER_ID "1"
 
-#define PUMP_PIN 2
+#define PUMP_PIN 15 //D8
 
 extern bool pumpState;
+uint8_t waterLevelPercentage;
 
 extern SemaphoreHandle_t wifi_alive;
 extern QueueHandle_t publish_queue;
@@ -20,6 +21,7 @@ extern void wifi_task(void *pvParameters);
 extern void beat_task(void *pvParameters);
 extern void mqtt_task(void *pvParameters);
 extern void switch_task(void *pvParameters);
+extern void wl_sensor_task(void *pvParameters);
 
 #define MQTT_HOST "192.168.1.2"
 #define MQTT_PORT 1883
@@ -29,10 +31,17 @@ extern void switch_task(void *pvParameters);
 #define MQTT_ATTRIBUTES_TOPIC "irrigation/controller" CONTROLLER_ID "/attributes"
 #define MQTT_STATUS_ONLINE "online"
 #define MQTT_STATUS_OFFLINE "offline"
+#define MQTT_WATER_LEVEL_TOPIC "irrigation/controller" CONTROLLER_ID "/waterlevel"
 
-#define MQTT_STATE_PUBLISH_PERIOD 10*60*1000 //ms
+#define MQTT_ATTRIBUTES_PUBLISH_PERIOD 10*60*1000 //ms
 
 #define BEAT_MSG_LEN 64
+
+
+#define PIN_HP4067_S0 5
+#define PIN_HP4067_S1 4
+#define PIN_HP4067_S2 0
+#define PIN_HP4067_S3 2
 
 #endif //MYTASKS_H
 

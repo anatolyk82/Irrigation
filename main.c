@@ -9,12 +9,14 @@
 
 #include "irrigation.h"
 
+/* Globals */
 SemaphoreHandle_t wifi_alive;
 QueueHandle_t publish_queue;
 TaskHandle_t switchTaskHandle = NULL;
 TaskHandle_t mqttTaskHandle = NULL;
 
-bool pumpState = false;  /* The current state of the pump */
+bool pumpState = false;             /* The current state of the pump */
+uint8_t waterLevelPercentage = 0;   /* Water level in percents */
 
 void user_init(void)
 {
@@ -28,5 +30,6 @@ void user_init(void)
     xTaskCreate(&beat_task, "beat_task", 256, NULL, 1, NULL);
     xTaskCreate(&mqtt_task, "mqtt_task", 1024, NULL, 1, &mqttTaskHandle);
     xTaskCreate(&switch_task, "switch_task", 256, NULL, 1, &switchTaskHandle);
+    xTaskCreate(&wl_sensor_task, "wl_sensor_task", 256, NULL, 1, NULL);
 }
 

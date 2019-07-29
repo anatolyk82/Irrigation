@@ -22,7 +22,7 @@ void beat_task(void *pvParameters)
     mqtt_message_data_t message_data;
 
     while (1) {
-        vTaskDelayUntil(&xLastWakeTime, MQTT_STATE_PUBLISH_PERIOD / portTICK_PERIOD_MS);
+        vTaskDelayUntil(&xLastWakeTime, MQTT_ATTRIBUTES_PUBLISH_PERIOD / portTICK_PERIOD_MS);
 
         /* Calculate uptime */
         TickType_t c = xTaskGetTickCount();
