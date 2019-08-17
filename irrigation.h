@@ -10,6 +10,8 @@
 
 #define PUMP_PIN 15 //D8
 
+#define FIRMWARE_VERSION "0.1.0"
+
 extern bool pumpState;
 uint8_t waterLevelPercentage;
 
@@ -38,8 +40,7 @@ extern bool put_mqtt_message_to_queue(mqtt_message_data_t *mqtt_message, const c
 
 #define MQTT_ATTRIBUTES_PUBLISH_PERIOD 10*60*1000 //ms
 
-#define BEAT_MSG_LEN 64
-
+#define MQTT_MESSAGE_LEN 128  // Max length of an mqtt message
 
 #define PIN_HP4067_S0 5
 #define PIN_HP4067_S1 4

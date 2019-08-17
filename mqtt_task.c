@@ -38,12 +38,19 @@ void beat_task(void *pvParameters)
             inet_ntop(AF_INET, &(info.ip), myIPaddr, INET_ADDRSTRLEN);
         }
 
-        char* msg = (char*)malloc(BEAT_MSG_LEN + 1);
+        char* msg = (char*)malloc(MQTT_MESSAGE_LEN);
         if (msg == NULL) {
             printf("Not enough memory to create a payload string in an attribute message");
             continue;
         }
 
+        memset(msg, 0, (MQTT_MESSAGE_LEN));
+        snprintf(msg, (MQTT_MESSAGE_LEN - 1), "{\"mac\":\"%s\",\"version\":\"%s\",\"uptime\":\"%dT%02d:%02d:%02d\",\"ip\":\"%s\"}", myMAC, FIRMWARE_VERSION, days, hours, minutes, seconds, myIPaddr);
+        printf("Attributes: %s - %d\n", msg, strlen(msg));
+
+        put_mqtt_message_to_queue(&message_data, MQTT_ATTRIBUTES_TOPIC, strlen(MQTT_ATTRIBUTES_TOPIC), msg, strlen(msg), MQTT_QOS0);
+
+        /*
         char* topic = (char*)malloc(strlen(MQTT_ATTRIBUTES_TOPIC) + 1);
         if (topic == NULL) {
             printf("Not enough memory to create a topic string in an attribute message");
@@ -52,11 +59,6 @@ void beat_task(void *pvParameters)
         }
         topic[strlen(MQTT_ATTRIBUTES_TOPIC)] = '\0';
         strncpy( topic, MQTT_ATTRIBUTES_TOPIC, strlen(MQTT_ATTRIBUTES_TOPIC) );
-
-        memset(msg, 0, (BEAT_MSG_LEN + 1));
-        //snprintf(msg, BEAT_MSG_LEN, "{\"mac\":\"%s\",\"uptime\":\"%dT%02d:%02d:%02d\",\"ip\":\"%s\"}", myMAC, days, hours, minutes, seconds, myIPaddr);
-        snprintf(msg, BEAT_MSG_LEN, "{\"uptime\":\"%dT%02d:%02d:%02d\",\"ip\":\"%s\"}", days, hours, minutes, seconds, myIPaddr);
-        printf("State: %s\n", msg);
 
         mqtt_string_t *message_topic = (mqtt_string_t*)malloc( sizeof(mqtt_string_t) );
         if ( message_topic == NULL ) {
@@ -90,6 +92,7 @@ void beat_task(void *pvParameters)
             printf("Not enough memory to create an attribute message\n");
             continue;
         }
+        */
     }
 }
 
@@ -142,7 +145,7 @@ void getMyMAC(char* mac)
 {
     uint8_t rawMAC[6];
 
-    memset(mac, 0, 18);
+    //memset(mac, 0, 18);
     sdk_wifi_get_macaddr(STATION_IF, (uint8_t *)rawMAC);
     sprintf(mac,"%02X:%02X:%02X:%02X:%02X:%02X",rawMAC[0],rawMAC[1],rawMAC[2],rawMAC[3],rawMAC[4],rawMAC[5]);
 }
@@ -179,8 +182,8 @@ void mqtt_task(void *pvParameters)
     struct mqtt_network network;
     mqtt_client_t client = mqtt_client_default;
     char mqtt_client_id[20];
-    uint8_t mqtt_buf[100];
-    uint8_t mqtt_readbuf[100];
+    uint8_t mqtt_buf[MQTT_MESSAGE_LEN];
+    uint8_t mqtt_readbuf[MQTT_MESSAGE_LEN];
     mqtt_packet_connect_data_t data = mqtt_packet_connect_data_initializer;
 
     mqtt_network_new( &network );
@@ -203,7 +206,7 @@ void mqtt_task(void *pvParameters)
         }
         printf("done\n");
 
-        mqtt_client_new(&client, &network, 5000, mqtt_buf, 100, mqtt_readbuf, 100);
+        mqtt_client_new(&client, &network, 5000, mqtt_buf, MQTT_MESSAGE_LEN, mqtt_readbuf, MQTT_MESSAGE_LEN);
 
         data.willFlag = 1;
         data.MQTTVersion = 3;
