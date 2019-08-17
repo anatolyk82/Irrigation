@@ -44,6 +44,7 @@ void wl_sensor_task(void *pvParameters)
     gpio_write(PIN_HP4067_S3, 0);
 
     mqtt_message_data_t message_data;
+    char msg[4];
 
     while (1) {
 
@@ -63,55 +64,10 @@ void wl_sensor_task(void *pvParameters)
         if (localWaterLevelPercentage != waterLevelPercentage) {
             waterLevelPercentage = localWaterLevelPercentage;
 
-            char* msg = (char*)malloc(4);
-            if (msg == NULL) {
-                printf("Not enough memory to create a payload string in a water level message");
-                continue;
-            }
             memset(msg, 0, 4);
-
-            char* topic = (char*)malloc(strlen(MQTT_WATER_LEVEL_TOPIC) + 1);
-            if (topic == NULL) {
-                printf("Not enough memory to create a topic string in a water level message");
-                free(msg);
-                continue;
-            }
-            memset(topic, 0, (strlen(MQTT_WATER_LEVEL_TOPIC) + 1));
-
-            strncpy( topic, MQTT_WATER_LEVEL_TOPIC, strlen(MQTT_WATER_LEVEL_TOPIC) );
             snprintf(msg, 3, "%d", waterLevelPercentage);
 
-            mqtt_string_t *message_topic = (mqtt_string_t*)malloc( sizeof(mqtt_string_t) );
-            if ( message_topic == NULL ) {
-                free(msg);
-                free(topic);
-                printf("Not enough memory to create a topic in a water level message\n");
-                continue;
-            }
-
-            mqtt_message_t *message = (mqtt_message_t*)malloc( sizeof(mqtt_message_t) );
-            if ( message != NULL ) {
-                message->payload = msg;
-                message->payloadlen = strlen(msg);
-                message->dup = 0;
-                message->qos = MQTT_QOS1;
-                message->retained = 0;
-
-                message_topic->lenstring.data = topic;
-                message_topic->lenstring.len = strlen(MQTT_WATER_LEVEL_TOPIC);
-
-                message_data.topic = message_topic;
-                message_data.message = message;
-
-                if (xQueueSend(publish_queue, &message_data, 0) == pdFALSE) {
-                    printf("Publish queue overflow.\n");
-                }
-            } else {
-                free(msg);
-                free(topic);
-                free(message_topic);
-                printf("Not enough memory to create a water level message\n");
-            }
+            put_mqtt_message_to_queue(&message_data, MQTT_WATER_LEVEL_TOPIC, strlen(MQTT_WATER_LEVEL_TOPIC), msg, strlen(msg), MQTT_QOS1);
         }
 
         vTaskDelay( delay );

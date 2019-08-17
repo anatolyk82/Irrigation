@@ -4,6 +4,7 @@
 #include <task.h>
 #include <semphr.h>
 #include <arpa/inet.h>
+#include <paho_mqtt_c/MQTTClient.h>
 
 #define CONTROLLER_ID "1"
 
@@ -22,6 +23,8 @@ extern void beat_task(void *pvParameters);
 extern void mqtt_task(void *pvParameters);
 extern void switch_task(void *pvParameters);
 extern void wl_sensor_task(void *pvParameters);
+
+extern bool put_mqtt_message_to_queue(mqtt_message_data_t *mqtt_message, const char* _topic, uint16_t topic_length, const char* _payload, uint16_t payload_length, char qos);
 
 #define MQTT_HOST "192.168.1.2"
 #define MQTT_PORT 1883
